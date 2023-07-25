@@ -3,3 +3,5 @@ eth-account
 pathlib
 ccxt
 pdr-utils
+pandas
+ta

@@ -3,7 +3,7 @@ import os
 import threading
 from datetime import datetime, timedelta, timezone
 from threading import Thread
-from pdr_predictoors.predictions.predict import predict_function
+from pdr_predictoors.predictions.predict import predict_function, predict_function_rb
 
 class NewPrediction(Thread):
     def __init__(self,topic,predictor_contract,current_block_num,avergage_time_between_blocks,epoch,blocks_per_epoch):
