@@ -1,32 +1,35 @@
 import ccxt
 import random
 
-def predict_function(topic,estimated_time):
-    """ Given a topic, let's predict 
-        Topic object looks like:
-        
-        {
-            "name":"ETH-USDT",
-            "address":"0x54b5ebeed85f4178c6cb98dd185067991d058d55",
-            "symbol":"ETH-USDT",
-            "blocks_per_epoch":"60",
-            "blocks_per_subscription":"86400",
-            "last_submited_epoch":0,
-            "pair":"eth-usdt",
-            "base":"eth",
-            "quote":"usdt",
-            "source":"kraken",
-            "timeframe":"5m"
-        }
-    
+
+def predict_function(topic, estimated_time):
+    """Given a topic, let's predict
+    Topic object looks like:
+
+    {
+        "name":"ETH-USDT",
+        "address":"0x54b5ebeed85f4178c6cb98dd185067991d058d55",
+        "symbol":"ETH-USDT",
+        "blocks_per_epoch":"60",
+        "blocks_per_subscription":"86400",
+        "last_submited_epoch":0,
+        "pair":"eth-usdt",
+        "base":"eth",
+        "quote":"usdt",
+        "source":"kraken",
+        "timeframe":"5m"
+    }
+
     """
-    print(f" We were asked to predict {topic['name']} (contract: {topic['address']}) value at estimated timestamp: {estimated_time}")
+    print(
+        f" We were asked to predict {topic['name']} (contract: {topic['address']}) value at estimated timestamp: {estimated_time}"
+    )
     predicted_confidence = None
     predicted_value = None
-    
+
     try:
         predicted_value = bool(random.getrandbits(1))
-        predicted_confidence = random.randint(1,100)
+        predicted_confidence = random.randint(1, 100)
 
         """ Or do something fancy, like:
         
@@ -44,4 +47,4 @@ def predict_function(topic,estimated_time):
     except Exception as e:
         print(e)
         pass
-    return(predicted_value,predicted_confidence)
+    return (predicted_value, predicted_confidence)
