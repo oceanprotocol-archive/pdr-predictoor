@@ -23,46 +23,15 @@ web3_config = Web3Config(os.environ.get("RPC_URL"),os.environ.get("PRIVATE_KEY")
 owner = web3_config.owner
 
 
-
-class NewPrediction(Thread):
-    def __init__(self,topic,predictor_contract,current_block_num,avergage_time_between_blocks,epoch,blocks_per_epoch):
-        # set a default value
-        self.values = { "last_submited_epoch": epoch,
-                      "contract_address": predictor_contract.contract_address   
-                      }
-        self.topic = topic
-        self.epoch = epoch
-        self.predictor_contract = predictor_contract
-        self.current_block_num = current_block_num
-        self.avergage_time_between_blocks = avergage_time_between_blocks
-        self.blocks_per_epoch = blocks_per_epoch
-
-    def run(self):
-        soonest_block = (self.epoch+2)*self.blocks_per_epoch
-        now = datetime.now(timezone.utc).timestamp()
-        estimated_time = now + (soonest_block - self.current_block_num)* self.avergage_time_between_blocks
-        (predicted_value,predicted_confidence) = predict_function(self.topic['name'],self.topic['address'],estimated_time)
-        if predicted_value is not None and predicted_confidence>0:
-            """ We have a prediction, let's submit it"""
-            stake_amount = os.getenv("STAKE_AMOUNT",1)*predicted_confidence/100
-            print(f"Contract:{self.predictor_contract.contract_address} - Submiting prediction for slot:{soonest_block}")
-            self.predictor_contract.submit_prediction(predicted_value,stake_amount,soonest_block)
-        else:
-            print(f"We do not submit, prediction function returned ({predicted_value}, {predicted_confidence})")
-        """ claim payouts if needed """
-        trueValSubmitTimeoutBlock = self.predictor_contract.get_trueValSubmitTimeoutBlock()
-        blocks_per_epoch = self.predictor_contract.get_blocksPerEpoch()
-        slot = self.epoch*blocks_per_epoch - trueValSubmitTimeoutBlock-1 
-        print(f"Contract:{self.predictor_contract.contract_address} - Claiming revenue for slot:{slot}")
-        self.predictor_contract.payout(slot)
-            
-
-
 def process_block(block,avergage_time_between_blocks):
     global topics
-    """ Process each contract and see if we need to submit """
+    """ Process each contract and if needed, get a prediction, submit it and claim revenue for past epoch """
     if not topics:
-        topics = get_all_interesting_prediction_contracts()
+        topics = get_all_interesting_prediction_contracts(os.environ.get("SUBGRAPH_URL"),
+                                                          os.environ.get("PAIR_FILTER",None),
+                                                          os.environ.get("TIMEFRAME_FILTER",None),
+                                                          os.environ.get("SOURCE_FILTER",None),
+                                                          os.environ.get("OWNER_ADDRS",None))
     print(f"Got new block: {block['number']} with {len(topics)} topics")
     for address in topics:
         topic = topics[address]
@@ -72,12 +41,27 @@ def process_block(block,avergage_time_between_blocks):
         blocks_till_epoch_end=epoch*blocks_per_epoch+blocks_per_epoch-block['number']
         print(f"\t{topic['name']} (at address {topic['address']} is at epoch {epoch}, blocks_per_epoch: {blocks_per_epoch}, blocks_till_epoch_end: {blocks_till_epoch_end}")
         if epoch > topic['last_submited_epoch'] and blocks_till_epoch_end<=int(os.getenv("BLOCKS_TILL_EPOCH_END",5)):
-            """ Let's make a prediction & claim rewards"""
-            thr = NewPrediction(topic,predictor_contract,block["number"],avergage_time_between_blocks,epoch,blocks_per_epoch)
-            thr.run()
-            address=thr.values['contract_address'].lower()
-            new_epoch = thr.values['last_submited_epoch']
-            topics[address]["last_submited_epoch"]=new_epoch
+            """ Try to estimate timestamp of prediction """
+            soonest_block = (epoch+2)*blocks_per_epoch
+            now = datetime.now(timezone.utc).timestamp()
+            estimated_time = now + (soonest_block - block["number"])* avergage_time_between_blocks
+            """ Let's fetch the prediction """
+            (predicted_value,predicted_confidence) = predict_function(topic,estimated_time)
+            if predicted_value is not None and predicted_confidence>0:
+                """ We have a prediction, let's submit it"""
+                stake_amount = os.getenv("STAKE_AMOUNT",1)*predicted_confidence/100
+                print(f"Contract:{predictor_contract.contract_address} - Submiting prediction for slot:{soonest_block}")
+                predictor_contract.submit_prediction(predicted_value,stake_amount,soonest_block,False)
+            else:
+                print(f"We do not submit, prediction function returned ({predicted_value}, {predicted_confidence})")
+            # let's get the payout for previous epoch.  We don't care if it fails...
+            trueValSubmitTimeoutBlock = predictor_contract.get_trueValSubmitTimeoutBlock()
+            slot = epoch*blocks_per_epoch - trueValSubmitTimeoutBlock-1 
+            print(f"Contract:{predictor_contract.contract_address} - Claiming revenue for slot:{slot}")
+            predictor_contract.payout(slot,False)
+            # update topics
+            topics[address]["last_submited_epoch"]=epoch
+    
 
 
 def log_loop(blockno):

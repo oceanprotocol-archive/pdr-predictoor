@@ -18,7 +18,7 @@ export STAKE_AMOUNT=1
 ```
 where:
   - STAKE_AMOUNT  = maximum stake (in decimal) for each prediction.  See predicted_confidence below
-  - you can also export SOURCE_FILTER, TIMEFRAME_FILTER, PAIR_FILTER *(comma-separated lists) to limit predictions based on NFT data. E.g. export PAIR_FILTER=eth-usdt,eth-btc
+
 
 Install requirements if needed
 ```bash
@@ -30,11 +30,18 @@ Start the predictoor:
 python3 main.py
 ```
 
+## Additional ENV variables used to filter:
+
+ - PAIR_FILTER = if we do want to act upon only same pair, like  "BTC/USDT,ETH/USDT"
+ - TIMEFRAME_FILTER = if we do want to act upon only same timeframes, like  "5m,15m"
+ - SOURCE_FILTER = if we do want to act upon only same sources, like  "binance,kraken"
+ - OWNER_ADDRS = if we do want to act upon only same publishers, like  "0x123,0x124"
+
 ## Fork and customize
-  The actual prediction code is in [prd_predictoors/predictions/predict.py](https://github.com/oceanprotocol/pdr-predictoors/blob/main/pdr_predictoors/predictions/predict.py#L3-L8).
+  The actual prediction code is in [predict.py](https://github.com/oceanprotocol/pdr-predictoors/blob/main/predict.py).
 
   We call predict_function with 2 args:
-   - topic:  this is ERC20.name
+   - topic:  this is pair object
    - estimated_time:  estimated timestamp of block that we are going to predict.   This is informal, blockchain mining time is not accurate
 
   Function returns two variables:
@@ -59,7 +66,6 @@ python3 main.py
   The default value is 5, which leaves us enough time.  (Ie: if block generation duration is 12 sec, we have 60 seconds to do our job)
 
 ## TO DO
-  - [ ]  - implement logic for STAKE_TOKENS
   - [ ]  - improve payouts collect flow
   - [ ]  - check for balances
   - [ ]  - improve approve/allowence flow
