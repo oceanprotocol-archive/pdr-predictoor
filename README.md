@@ -42,7 +42,7 @@ python3 main.py
    - predicted_confidence:   int, 1 -> 100%. This sets the stake (STAKE_AMOUNT * predicted_confidence/100) that you are willing to put in your prediction.
 
 
-  You need to change the function code and do some of your stuff. Now, it's just doing some random predictions
+  You need to change the function code and do some of your stuff. Now, it's just doing some random predictions. For an examplem of a model that predicts the price dircetion of an asset every `m` minutes see this [link](https://github.com/oceanprotocol/pdr-model-simple)
 
 ## BLOCKS_TILL_EPOCH_END
   If we want to predict the value for epoch E, we need to do it in epoch E - 2 (latest.  Of course, we could predictor values for a distant epoch in the future if we want to)
