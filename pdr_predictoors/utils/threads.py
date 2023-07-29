@@ -6,7 +6,7 @@ from threading import Thread
 from pdr_predictoors.predictions.predict import predict_function, predict_function_rb
 
 class NewPrediction(Thread):
-    def __init__(self,topic,predictor_contract,current_block_num,avergage_time_between_blocks,epoch,blocks_per_epoch):
+    def __init__(self,topic,predictor_contract,current_block_num,avergage_time_between_blocks,epoch,blocks_per_epoch,model,main_pd):
         # set a default value
         self.values = { "last_submited_epoch": epoch,
                       "contract_address": predictor_contract.contract_address   
@@ -17,12 +17,14 @@ class NewPrediction(Thread):
         self.current_block_num = current_block_num
         self.avergage_time_between_blocks = avergage_time_between_blocks
         self.blocks_per_epoch = blocks_per_epoch
+        self.model = model
+        self.main_pd = main_pd
 
     def run(self):
         soonest_block = (self.epoch+2)*self.blocks_per_epoch
         now = datetime.now(timezone.utc).timestamp()
         estimated_time = now + (soonest_block - self.current_block_num)* self.avergage_time_between_blocks
-        (predicted_value,predicted_confidence) = predict_function(self.topic['name'],self.topic['address'],estimated_time)
+        (predicted_value,predicted_confidence) = predict_function_rb(self.topic['name'],self.topic['address'],estimated_time,self.model,self.main_pd)
         if predicted_value is not None and predicted_confidence>0:
             """ We have a prediction, let's submit it"""
             stake_amount = os.getenv("STAKE_AMOUNT",1)*predicted_confidence/100
@@ -36,4 +38,6 @@ class NewPrediction(Thread):
         slot = self.epoch*blocks_per_epoch - trueValSubmitTimeoutBlock-1 
         print(f"Contract:{self.predictor_contract.contract_address} - Claiming revenue for slot:{slot}")
         self.predictor_contract.payout(slot)
+
+        return predicted_value
             
