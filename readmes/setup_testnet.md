@@ -35,7 +35,7 @@ mv .env.sample .env
 Edit the .env file and set the following environment variables:
 
 - PRIVATE_KEY: Set it to the private key of the wallet you funded earlier.
-- PAIR_FILTER: List of pairs to make predictions on (separated by comma), if empty the app will predict on all available pairs. For this example, set it to `"BTC/TUSD"`. You can find a list of available pairs from HERE FIX ME.
+- PAIR_FILTER: List of pairs to make predictions on (separated by comma), if empty the app will predict on all available pairs. For this example, set it to `"BTC/TUSD"`.
 - TIMEFRAME_FILTER: Timeframes to predict on (separated by comma), if empty the app will predict on all available timeframes. For this example, set it to `5m`.
 - SOURCE_FILTER: Price sources to predict on (separated by comma), if empty the app will predict on all available sources. For this example, set it to `BINANCE`
 - STAKE_TOKEN: List of Token contract addresses to be used to stake, if empty the app will try to stake with any token. Set this to testOCEAN token address since that's the token you have in your wallet and what the prediction contract accepts: `"["0x973e69303259B0c2543a38665122b773D28405fB"]"`
