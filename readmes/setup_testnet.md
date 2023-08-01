@@ -38,7 +38,7 @@ Edit the .env file and set the following environment variables:
 - PAIR_FILTER: List of pairs to make predictions on (separated by comma), if empty the app will predict on all available pairs. For this example, set it to `"BTC/TUSD"`. You can find a list of available pairs from HERE FIX ME.
 - TIMEFRAME_FILTER: Timeframes to predict on (separated by comma), if empty the app will predict on all available timeframes. For this example, set it to `5m`.
 - SOURCE_FILTER: Price sources to predict on (separated by comma), if empty the app will predict on all available sources. For this example, set it to `BINANCE`
-- STAKE_TOKEN: List of Token contract addresses to be used to stake, if empty the app will try to stake with any token. Set this to testOCEAN token address since that's the token you have in your wallet and what the prediction contract accepts: `"["0xFIXME"]"`
+- STAKE_TOKEN: List of Token contract addresses to be used to stake, if empty the app will try to stake with any token. Set this to testOCEAN token address since that's the token you have in your wallet and what the prediction contract accepts: `"["0x973e69303259B0c2543a38665122b773D28405fB"]"`
 - STAKE_AMOUNT: Determine the amount of tokens to stake if the confidence level is 100%. The final stake is calculated as (STAKE_AMOUNT * confidence / 100).
 - RPC_URL: The RPC URL of the network, set this to Sapphire testnet Websocket RPC URL: `https://testnet.sapphire.oasis.dev`
 - SUBGRAPH_URL: The Ocean subgraph url, set this to Sapphire testnet subgraph URL: `https://v4.subgraph.oasis-sapphire-testnet.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph/graphql`
